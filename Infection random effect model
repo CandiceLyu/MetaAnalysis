@@ -13,11 +13,11 @@ model{
 			 mu[i] ~ dnorm(0, 0.0001)
 			 # Loop through two intervention arms 
 			 for (k in 1:2){
-						# Binomial likelihood
-						r[i, k] ~ dbin(p[i, k], n[i, k])
-						# Model for linear predictor
-						logit(p[i, k]) <- mu[i] + delta[i, k]
-						}
+					# Binomial likelihood
+					r[i, k] ~ dbin(p[i, k], n[i, k])
+					# Model for linear predictor
+					logit(p[i, k]) <- mu[i] + delta[i, k]
+					}
 			# Trial-specific LOR distributions
 			delta[i, 2] ~ dnorm(d[2], tau)
 		}
