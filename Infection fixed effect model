@@ -7,7 +7,7 @@
 model{
   # Loop through studies
 	for (i in 1:ns){
-			 # Treatment effect is zero for intervention 1 (reference)
+			 # Vague priors for all trial baselines
 			 mu[i] ~ dnorm(0, 0.0001)
 			 # Loop through two intervention arms
 			 for (k in 1:2){
