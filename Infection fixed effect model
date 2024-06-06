@@ -1,0 +1,60 @@
+# Infection
+# Pairwise meta-analysis
+# Binomial likelihood, logit link
+# Fixed effect model
+
+# Model specification
+model{
+  # Loop through studies
+	for (i in 1:ns){
+			 # Treatment effect is zero for intervention 1 (reference)
+			 mu[i] ~ dnorm(0, 0.0001)
+			 # Loop through two intervention arms
+			 for (k in 1:2){
+					  # Binomial likelihood
+						r[i, k] ~ dbin(p[i, k], n[i, k])
+						# Model for linear predictor
+						logit(p[i, k]) <- mu[i] + d[k]
+						}
+		}
+# Treatment effect is zero for intervention 1
+d[1] <- 0
+# Vague prior for treatment effect of intervention 2
+d[2] ~ dnorm(0, 0.0001)
+# Odds-ratio
+OR <- exp(d[2])
+# Probability that the LOR is positive
+# Intervention 2 is inferior to intervention 1
+prob.inferior <- step(d[2])					
+}
+
+# Infection data
+list(ns = 15)
+n[,1]	r[,1]	n[,2]	r[,2]
+1155	41	13613	243
+420	47	478	116
+158993	17	236693	68
+79456	297	180790	474
+57604	3089	48706	4059
+466	6	1196	22
+100751	654	83998	644
+263	20	2949	375
+215	20	2109	327
+45285	264	45285	415
+4105	463	7119	1174
+1614377	5977	1793698	10827
+6374	95	8500	163
+273	10	2542	243
+116251	122	845906	1918
+END
+
+# Initial values
+# Chain 1
+list(d = c(NA, 0), 
+		 mu = c(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0))
+# Chain 2
+list(d = c(NA, -1), 
+		 mu = c(-3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3, -3))
+# Chain 3
+list(d = c(NA, -2), 
+		 mu = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
