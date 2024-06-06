@@ -5,26 +5,26 @@
 
 # Model specification
 model{
-  	# Loop through studies
+  	# Loop through each study
 	for (i in 1:ns){
-			 # Vague priors for all trial baselines
+			 # Set vague priors for the baseline of each trial
 			 mu[i] ~ dnorm(0, 0.0001)
-			 # Loop through two intervention arms
+			 # Iterate over the two intervention arms
 			 for (k in 1:2){
-					# Binomial likelihood
+					#  Binomial likelihood for the number of infections
 					r[i, k] ~ dbin(p[i, k], n[i, k])
-					# Model for linear predictor
+					# Linear predictor model
 					logit(p[i, k]) <- mu[i] + d[k]
 					}
 		}
-# Treatment effect is zero for intervention 1
+# The treatment effect is set to zero for the first intervention
 d[1] <- 0
-# Vague prior for treatment effect of intervention 2
+# Vague prior for the treatment effect of the second intervention
 d[2] ~ dnorm(0, 0.0001)
-# Odds-ratio
+# Take exponential to calculate the OR
 OR <- exp(d[2])
 # Probability that the LOR is positive
-# Intervention 2 is inferior to intervention 1
+# Indicates if the second intervention is worse than the first
 prob.inferior <- step(d[2])					
 }
 
@@ -66,34 +66,34 @@ list(d = c(NA, -2), mu = c(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1))
 
 # Model specification
 model{
-	# Loop through studies
+	# Loop through each study
 	for (i in 1:ns){
-			 # Treatment effect is zero for intervention 1 (reference)
+			 # The treatment effect is set to zero for the first intervention (reference)
 			 delta[i, 1] <- 0
-			 # Vague priors for all trial baselines
+			 # Set vague priors for the baseline of each trial
 			 mu[i] ~ dnorm(0, 0.0001)
-			 # Loop through two intervention arms 
+			 # Iterate over the two intervention arms
 			 for (k in 1:2){
-					# Binomial likelihood
+					# Binomial likelihood for the number of infections
 					r[i, k] ~ dbin(p[i, k], n[i, k])
-					# Model for linear predictor
+					# Linear predictor model
 					logit(p[i, k]) <- mu[i] + delta[i, k]
 					}
-			# Trial-specific LOR distributions
+			# Distribution of trial-specific log Odds Ratios
 			delta[i, 2] ~ dnorm(d[2], tau)
 		}
-# Treatment effect is zero for intervention 1
+# The treatment effect is set to zero for the first intervention
 d[1] <- 0
-# Vague prior for treatment effect of interevention 2
+# Vague prior for treatment effect of the second interevention 
 d[2] ~ dnorm(0, 0.0001)
-# Vague prior for between-trial SD
+# Vague prior for the between-trial standard deviation
 sd ~ dunif(0, 2)
 # Between-trial precision = 1 / between-trial variance
 tau <- pow(sd, -2)
-# Odds-ratio
+# Take exponential to calculate the OR
 OR <- exp(d[2])
 # Probability that the LOR is positive
-# Intervention 2 is inferior to intervention 1
+# Indicates if the second intervention is worse than the first
 prob.inferior <- step(d[2])					
 }
 
