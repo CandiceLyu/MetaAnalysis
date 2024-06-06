@@ -5,7 +5,7 @@
 
 # Model specification
 model{
-  # Loop through studies
+  	# Loop through studies
 	for (i in 1:ns){
 			 # Vague priors for all trial baselines
 			 mu[i] ~ dnorm(0, 0.0001)
