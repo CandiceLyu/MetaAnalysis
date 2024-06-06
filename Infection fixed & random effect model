@@ -5,26 +5,35 @@
 
 # Model specification
 model{
-  	# Loop through each study
+  # Loop through each study
 	for (i in 1:ns){
-			 # Set vague priors for the baseline of each trial
+			 # Set vague priors for the baseline infection rate of each study
 			 mu[i] ~ dnorm(0, 0.0001)
 			 # Iterate over the two intervention arms
 			 for (k in 1:2){
-					#  Binomial likelihood for the number of infections
-					r[i, k] ~ dbin(p[i, k], n[i, k])
-					# Linear predictor model
-					logit(p[i, k]) <- mu[i] + d[k]
-					}
+					  # Binomial likelihood for the observed number of infections
+						r[i, k] ~ dbin(p[i, k], n[i, k])
+						# Linear predictor model for the log-odds of infection
+						logit(p[i, k]) <- mu[i] + d[k]
+						# Expected number of infections
+						rhat[i, k] <- p[i, k] * n[i, k]
+						# Residual deviance contribution for each observation
+						dev[i, k] <- 2 * (r[i, k] * (log(r[i, k]) - log(rhat[i, k]))
+						+ (n[i, k] - r[i, k]) * (log(n[i, k] - r[i, k]) - log(n[i, k] - rhat[i, k])))
+						}
+		 # Sum the residual deviance for each study
+		resdev[i] <- sum(dev[i, ])
 		}
-# The treatment effect is set to zero for the first intervention
+# Total residual deviance across all studies
+totresdev <- sum(resdev[])
+# Treatment effect for the reference intervention (intervention 1) is set to zero
 d[1] <- 0
-# Vague prior for the treatment effect of the second intervention
+# Vague prior for treatment effect of intervention 2
 d[2] ~ dnorm(0, 0.0001)
-# Take exponential to calculate the OR
+# Take exponential to calculate OR for intervention 2 relative to intervention 1
 OR <- exp(d[2])
-# Probability that the LOR is positive
-# Indicates if the second intervention is worse than the first
+# Determine the probability that the LOR is positive
+# This indicates if intervention 2 is less effective than intervention 1
 prob.inferior <- step(d[2])					
 }
 
