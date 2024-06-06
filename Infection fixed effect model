@@ -11,11 +11,11 @@ model{
 			 mu[i] ~ dnorm(0, 0.0001)
 			 # Loop through two intervention arms
 			 for (k in 1:2){
-					  # Binomial likelihood
-						r[i, k] ~ dbin(p[i, k], n[i, k])
-						# Model for linear predictor
-						logit(p[i, k]) <- mu[i] + d[k]
-						}
+					# Binomial likelihood
+					r[i, k] ~ dbin(p[i, k], n[i, k])
+					# Model for linear predictor
+					logit(p[i, k]) <- mu[i] + d[k]
+					}
 		}
 # Treatment effect is zero for intervention 1
 d[1] <- 0
