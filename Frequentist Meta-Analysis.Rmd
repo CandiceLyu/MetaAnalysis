@@ -1,0 +1,173 @@
+---
+title: "Frequentist meta-analyses"
+author: "Candice"
+date: "2024-06-07"
+output:
+  html_document:
+    df_print: paged
+  pdf_document:
+    latex_engine: xelatex
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Frequentist Meta-Analysis
+
+The included studies report five outcome measures, listed in order of increasing severity: infection, symptomatic infection, severe infection, hospitalisation, and death. For each of these outcomes, we conduct separate classical (frequentist) meta-analyses. Both fixed-effect and random-effect models are applied to each outcome measure independently. These analyses do not account for potential correlations between the different outcomes. The risk ratio (RR) is used as the relative effect measure, comparing intervention 1 to intervention 2.
+
+## 1. Infection
+
+```{r}
+# Library relevant packages for meta-analysis
+library(meta)
+
+# Read in the infection data-set
+# with the first row containing variable names
+infec.data <- read.csv("infection_data.csv", header = TRUE)
+head(infec.data)
+
+# Fixed Effect & Random Effect Meta-Analysis Models
+# Using risk ratio (RR) as the measure
+infec.model <- metabin(event.e = n1, n.e = N1,
+                       event.c = n2, n.c = N2,
+                       data = infec.data, sm = "RR", method = "I",
+                       studlab = author_id, label.e = "Intervention 1", label.c = "Intervention 2")
+# Summary of the meta-analysis model
+summary(infec.model)
+
+# Forest Plot
+# Showing relative risk of intervention 1 relative to intervention 2
+# with corresponding 95% confidence intervals
+forest(infec.model, studlab = author_id, prediction = TRUE)
+
+# Assessing and accounting for small-study effects
+# Funnel Plot
+funnel(infec.model)
+
+# Test for funnel plot asymmetry using the linear regression method
+metabias(infec.model, method.bias = "linreg", plotit = TRUE)
+```
+
+Based on the meta-analysis of 15 studies with a total of 5,459,570 vaccinations and 32,190 infection events, the overall relative risk (RR) for intervention 1 compared to intervention 2 was found to be 0.6487 (95% CI: 0.6338 to 0.6640) using the fixed-effect model, and 0.6849 (95% CI: 0.5469 to 0.8577) using the random-effects model. Both models indicate a statistically significant reduction in risk with intervention 1 (p < 0.0001 for the fixed-effect model and p = 0.0010 for the random-effects model). The high $I^2$ value of 93.7% suggests substantial heterogeneity among the included studies. The test for funnel plot asymmetry (Egger's test) did not indicate significant publication bias (p = 0.3782). These results suggest that intervention 1 is associated with a lower risk of infection compared to intervention 2.
+
+## 2. Symptomatic Infection
+
+```{r}
+# Read in the symptomatic infection data-set
+# with the first row containing variable names
+sym.infec.data <- read.csv("symptomatic_infection_data.csv", header = TRUE)
+head(sym.infec.data)
+
+# Fixed Effect & Random Effect Meta-Analysis Models
+sym.infec.model <- metabin(event.e = n1, n.e = N1,
+                           event.c = n2, n.c = N2, 
+                           data = sym.infec.data, sm = "RR", method = "I",
+                           studlab = author_id, label.e = "Intervention 1", label.c = "Intervention 2")
+# Summary of the meta-analysis model
+summary(sym.infec.model)
+
+# Forest Plot
+# Showing relative risk of intervention 1 relative to intervention 2
+# with corresponding 95% confidence intervals
+forest(sym.infec.model, studlab = author_id, prediction = TRUE)
+
+# Assessing and accounting for small-study effects
+# Funnel Plot
+funnel(sym.infec.model)
+```
+
+The meta-analysis of five studies on symptomatic infection, comprising a total of 598,841 observations and 4,608 events, shows a statistically significant reduction in risk for intervention 1 compared to intervention 2. The fixed-effect model indicates a relative risk (RR) of 0.7506 (95% CI: 0.7084 to 0.7954, p < 0.0001), while the random-effects model shows a slightly lower RR of 0.7033 (95% CI: 0.5912 to 0.8367, p < 0.0001).
+
+These results suggest that intervention 1 is associated with a lower risk of symptomatic infection compared to intervention 2. However, there is substantial heterogeneity among the studies, as indicated by an $I^2$ value of 75.1%, which means that a significant proportion of the variability in effect estimates is due to heterogeneity rather than chance. The test for heterogeneity (Q = 16.06, df = 4, p = 0.0029) also confirms the presence of significant heterogeneity.
+
+Overall, intervention 1 shows a consistent benefit in reducing symptomatic infection across the studies, but the substantial heterogeneity should be considered in interpreting these results.
+
+## 3. Severe Infection
+
+```{r}
+# Read in the severe infection data-set
+# with the first row containing variable names
+sev.infec.data <- read.csv("severe_infection_data.csv", header = TRUE)
+head(sev.infec.data)
+
+# Fixed Effect & Random Effect Meta-Analysis Models
+sev.infec.model <- metabin(event.e = n1, n.e = N1,
+                           event.c = n2, n.c = N2, 
+                           data = sev.infec.data, sm = "RR", method = "I",
+                           studlab = author_id, label.e = "Intervention 1", label.c = "Intervention 2")
+summary(sev.infec.model)
+
+# Forest Plot
+forest(sev.infec.model, studlab = author_id, prediction = TRUE)
+
+# Assessing and accounting for small-study effects
+# Funnel Plot
+funnel(sev.infec.model)
+```
+
+The meta-analysis of six studies on severe infection, comprising a total of 5,808,940 observations and 3,055 events, indicates that intervention 1 is associated with a statistically significant reduction in the risk of severe infection compared to intervention 2. The fixed-effect model shows a relative risk (RR) of 0.6415 (95% CI: 0.5947 to 0.6920, p < 0.0001), while the random-effects model indicates an RR of 0.6594 (95% CI: 0.5731 to 0.7587, p < 0.0001).
+
+These results suggest that intervention 1 significantly reduces the risk of severe infection. However, there is moderate heterogeneity among the included studies, as reflected by an $I^2$ value of 58.3%, indicating that approximately 58.3% of the variability in effect estimates is due to heterogeneity rather than chance. The heterogeneity test (Q = 11.99, df = 5, p = 0.0349) also supports the presence of significant heterogeneity.
+
+## 4. Hospitalisation
+
+```{r}
+# Read in the hospitalisation data-set
+hos.data <- read.csv("hospitalisation_data.csv", header = TRUE)
+head(hos.data)
+
+# Fixed Effect & Random Effect Meta-Analysis Models
+# Using risk ratio (RR) as the measure
+hos.model <- metabin(event.e = n1, n.e = N1, 
+                     event.c = n2, n.c = N2, 
+                     data = hos.data, sm = "RR", method = "I",
+                     studlab = author_id, label.e = "Intervention 1", label.c = "Intervention 2")
+summary(hos.model)
+
+# Forest Plot
+forest(hos.model, studlab = author_id, prediction = TRUE)
+
+# Assessing and accounting for small-study effects
+# Funnel Plot
+funnel(hos.model)
+```
+
+The meta-analysis of four studies on hospitalisation, comprising a total of 4,749,448 observations and 2,453 events, shows a statistically significant reduction in the risk of hospitalisation for intervention 1 compared to intervention 2. The fixed-effect model indicates a relative risk (RR) of 0.6157 (95% CI: 0.5667 to 0.6688, p < 0.0001), while the random-effects model shows an RR of 0.6198 (95% CI: 0.5568 to 0.6901, p < 0.0001).
+
+These findings suggest that intervention 1 significantly reduces the risk of hospitalisation. The $I^2$ value of 49.6% indicates moderate heterogeneity, meaning that nearly half of the variability in effect estimates is due to heterogeneity rather than chance. However, the test for heterogeneity (Q = 5.95, df = 3, p = 0.1141) is not statistically significant, suggesting that the observed heterogeneity might not be substantial.
+
+## 5. Death
+
+```{r}
+# Read in the death data-set
+death.data <- read.csv("death_data.csv", header = TRUE)
+head(death.data)
+
+# Fixed Effect & Random Effect Meta-Analysis Models
+# Using risk ratio (RR) as the measure
+death.model <- metabin(event.e = n1, n.e = N1, 
+                       event.c = n2, n.c = N2, 
+                       data = death.data, sm = "RR", method = "I",
+                       studlab = author_id, label.e = "Intervention 1", label.c = "Intervention 2")
+summary(death.model)
+
+# Forest Plot
+forest(death.model, studlab = author_id, prediction = TRUE)
+
+# Assessing and accounting for small-study effects
+# Funnel Plot
+funnel(death.model)
+```
+
+The meta-analysis of three studies on death, comprising a total of 2,212,962 observations and 427 events, suggests that intervention 1 may reduce the risk of death compared to intervention 2, but the results are not statistically significant. The fixed-effect model shows a relative risk (RR) of 0.7807 (95% CI: 0.5982 to 1.0191, p = 0.0686), and the random-effects model indicates an RR of 0.7750 (95% CI: 0.5639 to 1.0652, p = 0.1162).
+
+These results suggest a potential reduction in the risk of death with intervention 1, but the evidence is not strong enough to conclude a significant effect, as indicated by the p-values above 0.05 in both models. The $I^2$ value of 0.0% indicates no observed heterogeneity among the included studies, suggesting that the variability in effect estimates is due to chance rather than differences between studies. This is further supported by the non-significant test for heterogeneity (Q = 1.54, df = 2, p = 0.4621).
+
+# Conclusion
+
+According to the meta-analyses conducted on the five outcomes separately, intervention 1 consistently demonstrates a significant benefit over intervention 2 in reducing the risks of infection, symptomatic infection, severe infection, and hospitalisation. However, the data on mortality does not show a statistically significant difference between the two interventions, indicating that while intervention 1 may have a positive impact, further research is needed to establish a definitive conclusion regarding its effect on reducing deaths.
+
+In summary, intervention 1 appears to be more effective than intervention 2. The heterogeneity observed in some analyses suggests that further studies could help clarify the extent of these benefits and provide more robust conclusions.
+
