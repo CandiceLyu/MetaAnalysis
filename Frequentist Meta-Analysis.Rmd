@@ -1,0 +1,50 @@
+---
+title: "Frequentist meta-analyses"
+author: "Candice"
+date: "2024-06-07"
+output: pdf_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+## Frequentist Meta-Analysis
+
+## Infection Data
+
+## Fixed-Effect Meta-Analysis Model
+
+```{r}
+# Library relevant packages for meta-analysis
+library(meta)
+library(metafor)
+library(metasens)
+
+# Read in the infection data-set
+# with the first row containing variable names
+infection.data <- read.csv("bin_data_anonymised.csv", header = TRUE)
+head(infection)
+
+# Fixed Effect & Random Effect Meta-Analysis Models
+# Using risk ratio (RR) as the measure
+model1 <- metabin(event.e = n1, n.e = N1, 
+                  event.c = n2, n.c = N2, 
+                  data = infection, sm = "RR", method = "I",
+                  studlab = author_id, label.e = "Intervention 1", label.c = "Intervention 2")
+# Summary of the meta-analysis model
+summary(model1)
+
+# Forest Plot
+# Showing relative risk of intervention 1 relative to intervention 2
+# with corresponding 95% confidence intervals
+forest(model1, studlab = author_id, prediction = TRUE)
+
+# Assessing and accounting for small-study effects
+# Funnel Plot
+funnel(model1)
+
+# Test for funnel plot asymmetry using the linear regression method
+metabias(model1, method.bias = "linreg", plotit = TRUE)
+```
+
