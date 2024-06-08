@@ -110,7 +110,7 @@ for (j in 1:9){
 	      }
 }
 
-# Data
+# Data: observed event counts (r) and sample sizes (n)
 r[,1]	n[,1]	r[,2]	n[,2]		# study id
 # 0 -> 1
 41	1155	243	13613		# 1
