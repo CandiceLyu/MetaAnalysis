@@ -4,27 +4,27 @@
 # Model specification
 model{
 for (i in 1:ns){
-      # Define the log of the probability for intervention 1
-			mu[i] <- log(p1[i])
-      # Prior distribution for the probability of an event in intervention 1
-			p1[i] ~ dunif(0, 1)
+      		# Define the log of the probability for intervention 1
+		mu[i] <- log(p1[i])
+      		# Prior distribution for the probability of an event in intervention 1
+		p1[i] ~ dunif(0, 1)
 
-      # Binomial likelihood: observed events in two intervention groups
-			r1[i] ~ dbin(p1[i], n1[i])
-			r2[i] ~ dbin(p2[i], n2[i])
+      		# Binomial likelihood: observed events in two intervention groups
+		r1[i] ~ dbin(p1[i], n1[i])
+		r2[i] ~ dbin(p2[i], n2[i])
 
-      # Expected number of events
-			rhat1[i] <- p1[i] * n1[i]
-			rhat2[i] <- p2[i] * n2[i]
+      		# Expected number of events
+		rhat1[i] <- p1[i] * n1[i]
+		rhat2[i] <- p2[i] * n2[i]
 
-			# Model the log of the probability for intervention 2 based on intervention 1
-			log(p2[i]) <- mu[i] + min(d, -mu[i])
+		# Model the log of the probability for intervention 2 based on intervention 1
+		log(p2[i]) <- mu[i] + min(d, -mu[i])
 
-      # Deviance for model fit diagnostics, exclude the last study
-			dev1[i] <- (1 - equals(i, ns)) * (2 * (r1[i] * (log(r1[i]) - log(rhat1[i])) + (n1[i] - r1[i]) * (log(n1[i] - r1[i]) - log(n1[i] - rhat1[i]))))
-			dev2[i] <- (1 - equals(i, ns)) * (2 * (r2[i] * (log(r2[i]) - log(rhat2[i])) + (n2[i] - r2[i]) * (log(n2[i] - r2[i]) - log(n2[i] - rhat2[i]))))
-			resdev[i] <- dev1[i] + dev2[i]
-										}
+     		# Deviance for model fit diagnostics, exclude the last study
+		dev1[i] <- (1 - equals(i, ns)) * (2 * (r1[i] * (log(r1[i]) - log(rhat1[i])) + (n1[i] - r1[i]) * (log(n1[i] - r1[i]) - log(n1[i] - rhat1[i]))))
+		dev2[i] <- (1 - equals(i, ns)) * (2 * (r2[i] * (log(r2[i]) - log(rhat2[i])) + (n2[i] - r2[i]) * (log(n2[i] - r2[i]) - log(n2[i] - rhat2[i]))))
+		resdev[i] <- dev1[i] + dev2[i]
+		}
 
 # Total residual deviance for model fit diagnostics
 totresdev <- sum(resdev[])
@@ -34,32 +34,35 @@ d ~ dnorm(0, 0.0001)
 RR <- exp(d)
 }
 
+############################################################################################################################################################################
+############################################################################################################################################################################
+
 # 4.2 Random Effect Model
 # Model specification
 model{
 for (i in 1:ns){
-      # Define the log of the probability for intervention 1
-			mu[i] <- log(p1[i])
-      # Prior distribution for the probability of an event in intervention 1
-			p1[i] ~ dunif(0, 1)
+      		# Define the log of the probability for intervention 1
+		mu[i] <- log(p1[i])
+      		# Prior distribution for the probability of an event in intervention 1
+		p1[i] ~ dunif(0, 1)
 
-			# Binomial likelihood: observed events in two intervention groups
-			r1[i] ~ dbin(p1[i], n1[i])
-			r2[i] ~ dbin(p2[i], n2[i])
+		# Binomial likelihood: observed events in two intervention groups
+		r1[i] ~ dbin(p1[i], n1[i])
+		r2[i] ~ dbin(p2[i], n2[i])
 
-			# Expected number of events
-			rhat1[i] <- p1[i] * n1[i]
-			rhat2[i] <- p2[i] * n2[i]
+		# Expected number of events
+		rhat1[i] <- p1[i] * n1[i]
+		rhat2[i] <- p2[i] * n2[i]
 
-      # Model the log of the probability for intervention 2 based on intervention 1 with study-specific effects
-			log(p2[i]) <- mu[i] + min(delta[i], -mu[i])
-			delta[i] ~ dnorm(d, prec)
+      		# Model the log of the probability for intervention 2 based on intervention 1 with study-specific effects
+		log(p2[i]) <- mu[i] + min(delta[i], -mu[i])
+		delta[i] ~ dnorm(d, prec)
 
-      # Deviance for model fit diagnostics, exclude the last study
-			dev1[i] <- (1 - equals(i, ns)) * (2 * (r1[i] * (log(r1[i]) - log(rhat1[i])) + (n1[i] - r1[i]) * (log(n1[i] - r1[i]) - log(n1[i] - rhat1[i]))))
-			dev2[i] <- (1 - equals(i, ns)) * (2 * (r2[i] * (log(r2[i]) - log(rhat2[i])) + (n2[i] - r2[i]) * (log(n2[i] - r2[i]) - log(n2[i] - rhat2[i]))))
-			resdev[i] <- dev1[i] + dev2[i]
-										}
+      		# Deviance for model fit diagnostics, exclude the last study
+		dev1[i] <- (1 - equals(i, ns)) * (2 * (r1[i] * (log(r1[i]) - log(rhat1[i])) + (n1[i] - r1[i]) * (log(n1[i] - r1[i]) - log(n1[i] - rhat1[i]))))
+		dev2[i] <- (1 - equals(i, ns)) * (2 * (r2[i] * (log(r2[i]) - log(rhat2[i])) + (n2[i] - r2[i]) * (log(n2[i] - r2[i]) - log(n2[i] - rhat2[i]))))
+		resdev[i] <- dev1[i] + dev2[i]
+		}
 
 # Total residual deviance for model fit diagnostics
 totresdev <- sum(resdev[])
