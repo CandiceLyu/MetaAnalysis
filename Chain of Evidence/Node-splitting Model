@@ -1,0 +1,186 @@
+# 2. Node-splitting Model
+
+# Model specification
+model{
+# Loop through all trials
+for (i in 1:33){
+			# Log of the baseline probability
+			mu[i] <- log(p[i, 1])
+			# Vague prior for the baseline probability
+			p[i, 1] ~ dunif(0, 1)
+			# Loop through the two interventions
+			for (k in 1:2){
+				    # Binomial likelihood
+						r[i, k] ~ dbin(p[i, k], n[i, k])
+						# Expected number of events
+						rhat[i, k] <- p[i, k] * n[i, k]
+						# Deviance contribution of each observation
+						dev[i, k] <- 2 * (r[i, k] * (log(r[i, k]) - log(rhat[i, k])) 
+						+ (n[i, k] - r[i, k]) * (log(n[i, k] - r[i, k]) - log(n[i, k] - rhat[i, k])))	
+													}
+										}
+										
+# Model for effect 0 => 1 (trials 1 to 15)
+for (i in 1:15){
+		 log(p[i, 2]) <- mu[i] + min(delta[i], -mu[i])
+		 # 0 => 1 trial-specific effects
+		 delta[i] ~ dnorm(d[1], tau)
+										}
+# Vague prior for mean 0 => 1 effect
+d[1] ~ dnorm(0, 0.001)
+
+# Priors for standard deviation and precision
+# Half-normal prior for SD
+sd ~ dnorm(0, prec) I(0, ) 
+# Precision for the half-normal prior
+prec <- pow(0.32, -2)
+# Precision for the normal distribution of delta[i]
+tau <- pow(sd, -2)
+
+# Model for effect 1 => 2 (trials 16 to 20)
+for (i in 16:20){
+		 log(p[i, 2]) <- mu[i] + min(d[2], -mu[i])
+											}
+# Vague prior for 1 => 2 effect
+d[2] ~ dnorm(0, 0.001)
+
+# Model for effect 2 => 3 (trials 21 to 23)
+for (i in 21:23){
+		 log(p[i, 2]) <- mu[i] + min(d[3], -mu[i])
+											}
+# Vague prior for 2 => 3 effect
+d[3] ~ dnorm(0, 0.001)									
+	
+# Model for effect 3 => 4 (trials 24 to 26)
+for (i in 24:26){
+		 log(p[i, 2]) <- mu[i] + min(d[4], -mu[i])
+											}
+# Vague prior for 3 => 4 effect
+d[4] ~ dnorm(0, 0.001)					
+
+# Model for effect 4 => 5 (trials 27 to 28)
+for (i in 27:28){
+		 log(p[i, 2]) <- mu[i] + min(d[5], -mu[i])
+											}
+# Vague prior for 4 => 5 effect
+d[5] ~ dnorm(0, 0.001)
+
+# Model for effect 0 => 3 (trial 29)
+for (i in 29:29){
+		 log(p[i, 2]) <- mu[i] + min(delta2[i], -mu[i])
+		 delta2[i] ~ dnorm(d[6], tau)
+											}
+# Direct 0 => 3 effect
+d[6] ~ dnorm(0, 0.0001)
+# Indirect 0 => 3 effect
+d[7] <- d[1] + d[2] + d[3]
+# Checking for conflict
+# Direct 0 => 3 - Indirect 0 => 3
+p.xval1 <- step(d[6] - d[7])
+		
+# Model for effect 1 => 3 (trials 30 to 31)
+for (i in 30:31){
+		 log(p[i, 2]) <- mu[i] + min(delta3[i], -mu[i])
+		 delta3[i] ~ dnorm(d[8], tau)
+											}
+# Direct 1 => 3 effect
+d[8] ~ dnorm(0, 0.0001)
+# Indirect 1 => 3 effect
+d[9] <- d[2] + d[3]
+# Checking for conflict
+# Direct 1 => 3 - Indirect 1 => 3
+p.xval2 <- step(d[8] - d[9])
+							
+# Model for effect 1 => 4 (trial 32)
+for (i in 32:32){
+		 log(p[i, 2]) <- mu[i] + min(delta4[i], -mu[i])
+		 delta4[i] ~ dnorm(d[10], tau)
+											}
+# Direct 1 => 4 effect
+d[10] ~ dnorm(0, 0.0001)
+# Indirect 1 => 4 effect
+d[11] <- d[2] + d[3] + d[4]
+# Checking for conflict
+# Direct 1 => 4 - Indirect 1 => 4
+p.xval3 <- step(d[10] - d[11])
+															
+# Model for effect 3 => 5 (trial 33)
+for (i in 33:33){
+		 log(p[i, 2]) <- mu[i] + min(delta5[i], -mu[i])
+		 delta5[i] ~ dnorm(d[12], tau)
+											}
+# Direct 3 => 5 effect
+d[12] ~ dnorm(0, 0.0001)
+# Indirect 3 => 5 effect
+d[13] <- d[4] + d[5]
+# Checking for conflict
+# Direct 3 => 5 - Indirect 3 => 5
+p.xval4 <- step(d[12] - d[13])
+
+# Total residual deviance
+totresdev <- sum(dev[ , ])
+
+# Calculate Relative Risks (RR)
+for (j in 1:13){
+		 # Log RR for each effect
+		 log(rr[j]) <- d[j]
+									}
+}
+
+# Data
+r[,1]	n[,1]	r[,2]	n[,2]		# study id
+# 0 -> 1
+41	1155	243	13613		# 1
+47	420	116	478		# 2
+17	158993	68	236693		# 3
+297	79456	474	180790		# 4
+3089	57604	4059	48706		# 5
+6	466	22	1196		# 6
+654	100751	644	83998		# 7
+20	263	375	2949		# 8
+20	215	327	2109		# 9
+264	45285	415	45285		# 10
+463	4105	1174	7119		# 11
+5977	1614377	10827	1793698		# 12
+95	6374	163	8500		# 13
+10	273	243	2542		# 14
+122	116247	1918	845906		# 15
+# 1 -> 2					
+17	17	68	68		# 3
+474	1831	719	2139		# 5
+654	654	644	644		# 7
+20	20	375	375		# 8
+463	463	1174	1174		# 11
+# 2 -> 3					
+2	17	21	68		# 3
+161	1518	218	1638		# 5
+14	654	22	644		# 7
+# 3 -> 4					
+2	2	21	21		# 3
+646	646	1195	1195		# 12
+183	183	296	296		# 16
+# 4 -> 5					
+0.5	2	0.5	21		# 3
+57	183	72	296		# 16
+# 0 -> 3					
+183	402102	296	453015		# 16
+# 1 -> 3					
+646	5977	1195	10827		# 12
+24	122	273	1918		# 15
+# 1 -> 4					
+41	264	69	415		# 10
+# 3 -> 5					
+24	24	273	273		# 15
+END
+
+# Initial values
+# Chain 1
+list(d = c(0, 0, 0, 0, 0, NA, NA, NA, NA, NA, NA, NA, NA))
+# Chain 2
+list(d = c(-1, -3, -1, -3, -1, NA, NA, NA, NA, NA, NA, NA, NA))
+# Chain 3
+list(d = c(1, -3, 1, -3, 1, NA, NA, NA, NA, NA, NA, NA, NA))
+# Chain 4
+list(d = c(2, 4, 2, 4, 2, NA, NA, NA, NA, NA, NA, NA, NA))
+
+
