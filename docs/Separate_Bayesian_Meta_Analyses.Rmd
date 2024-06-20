@@ -1,0 +1,375 @@
+---
+title: "Bayesian Meta Analyses"
+author: "Candice"
+date: "2024-06-17"
+output:
+  pdf_document:
+    latex_engine: xelatex
+  html_document:
+    df_print: paged
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+# Separate Bayesian Meta Analysese for Each Outcome
+
+This document presents the Bayesian meta-analysis conducted for five distinct outcomes: infection, symptomatic infection, severe infection, hospitalisation, and death. Our analysis involved assessing the fit of chosen prior distributions to observed data through both prior predictive checks and posterior predictive checks.
+
+Three different prior choices were evaluated to compare their performance:
+
+-   **Non-Informative Priors:** These priors assume minimal influence on the posterior distribution, allowing the data to predominantly determine the inference.
+
+-   **Weakly Informative Priors with Half-Cauchy Prior for Heterogeneity:** These priors provide some guidance based on previous knowledge or assumptions, particularly for the heterogeneity parameter, using a half-Cauchy distribution known for its ability to accommodate potentially large variability.
+
+-   **Weakly Informative Priors with Half-Normal for Heterogeneity:** Similar to the previous choice, this option incorporates weak guidance for the heterogeneity parameter using a half-normal distribution, which is suitable for modeling bounded continuous variables.
+
+```{r, warning = FALSE, message = FALSE}
+# Library relevant packages
+library(brms)
+library(metafor) 
+library(rstan) 
+library(kableExtra) 
+library(ggplot2) 
+library(bayesplot)
+library(gridExtra) 
+library(ggplotify) 
+library(ggridges) 
+library(tidybayes) 
+library(dplyr) 
+library(glue) 
+library(stringr) 
+library(forcats)
+library(posterior)
+
+color_scheme_set("red")
+
+# Load data for each of the five outcomes
+# with the first row containing variable names 
+infec.data <- read.csv("infection_data.csv", header = TRUE)
+sym.infec.data <- read.csv("symptomatic_infection_data.csv", header = TRUE)
+sev.infec.data <- read.csv("severe_infection_data.csv", header = TRUE)
+hos.data <- read.csv("hospitalisation_data.csv", header = TRUE)
+death.data <- read.csv("death_data.csv", header = TRUE)
+```
+
+
+```{r, warning = FALSE, message = FALSE}
+## Helper function to prepare data for Bayesian meta-analysis
+# Calculate log relative risks, relative risks, variances, and SEs
+prepare_data <- function(data){
+  es <- escalc(measure = "RR", 
+               ai = n1, n1i = N1, 
+               ci = n2, n2i = N2, 
+               slab = author_id, data = data)
+  es$RR <- exp(es$yi)
+  es$sei <- sqrt(es$vi)
+  
+  # Remove the third and fourth columns corresponding to intervention indication variables
+  es <- es[, -c(3, 4)]
+  
+  return(es)
+}
+
+# Prepare data for each outcome
+infec.es <- prepare_data(infec.data)
+sym.infec.es <- prepare_data(sym.infec.data)
+sev.infec.es <- prepare_data(sev.infec.data)
+hos.es <- prepare_data(hos.data)
+death.es <- prepare_data(death.data)
+```
+
+
+## Prior Predictive Checks
+
+```{r, warning = FALSE, message = FALSE}
+## Define a function to run Bayesian meta-analysis with prior predictive check
+run_prior_predictive_checks <- function(data, model_name, priors, seed = 18006513){
+  # Bayesian meta-analysis model using brms package
+  model <- brm(
+    data = data,
+    family = "gaussian",
+    yi | se(sei) ~ 1 + (1 | author_id),
+    prior = priors,
+    iter = 2000, warmup = 1000, cores = 4, chains = 4,
+    control = list(adapt_delta = 0.99),
+    # Perform prior predictive checks
+    sample_prior = "only", 
+    seed = seed
+  )
+  
+  # Prior predictive check plot
+  plot <- pp_check(model, ndraws = 100)
+  
+  # Store model and plot in global environment
+  assign(paste0(model_name, ".prior"), model, envir = .GlobalEnv)
+  assign(paste0(model_name, ".priorpc.plot"), plot, envir = .GlobalEnv)
+}
+
+
+## Define priors for different models
+# Model 1: Non-informative Priors
+priors_non_informative <- c(prior(normal(0, 10000), class = Intercept), 
+                            prior(uniform(0, 10000), class = sd))
+
+# Model 2: Weakly Informative Priors with Half-Cauchy
+priors_half_cauchy <- c(prior(normal(0, 1), class = Intercept), 
+                        prior(cauchy(0, 0.5), class = sd))
+
+# Model 3: Weakly Informative Priors with Half-Normal
+priors_half_normal <- c(prior(normal(0, 1), class = Intercept), 
+                        prior(normal(0, 0.5), class = sd, lb = 0))
+
+```
+
+
+```{r, warning = FALSE, message = FALSE, fig.cap = "Model Prior Predictive Checks (Infection)"}
+## Run prior predictive checks for each outcome and prior model
+
+# Infection
+run_prior_predictive_checks(infec.es, "infec1", priors_non_informative)
+run_prior_predictive_checks(infec.es, "infec2", priors_half_cauchy)
+run_prior_predictive_checks(infec.es, "infec3", priors_half_normal)
+
+# Plot results for infection models
+grid.arrange(infec1.priorpc.plot, 
+             infec2.priorpc.plot,
+             infec3.priorpc.plot)
+```
+
+
+```{r, warning = FALSE, message = FALSE, fig.cap = "Model Prior Predictive Checks (Symptomatic Infection)"}
+# Symptomatic Infection
+run_prior_predictive_checks(sym.infec.es, "sym1", priors_non_informative)
+run_prior_predictive_checks(sym.infec.es, "sym2", priors_half_cauchy)
+run_prior_predictive_checks(sym.infec.es, "sym3", priors_half_normal)
+
+# Plot results for symptomatic infection models
+grid.arrange(sym1.priorpc.plot,
+             sym2.priorpc.plot,
+             sym3.priorpc.plot)
+```
+
+
+```{r, warning = FALSE, message = FALSE, fig.cap = "Model Prior Predictive Checks (Severe Infection)"}
+# Severe Infection
+run_prior_predictive_checks(sev.infec.es, "sev1", priors_non_informative)
+run_prior_predictive_checks(sev.infec.es, "sev2", priors_half_cauchy)
+run_prior_predictive_checks(sev.infec.es, "sev3", priors_half_normal)
+
+# Plot results for severe infection models
+grid.arrange(sev1.priorpc.plot,
+             sev2.priorpc.plot,
+             sev3.priorpc.plot)
+```
+
+
+```{r, warning = FALSE, message = FALSE, fig.cap = "Model Prior Predictive Checks (Hospitalisation)"}
+# Hospitalisation
+run_prior_predictive_checks(hos.es, "hos1", priors_non_informative)
+run_prior_predictive_checks(hos.es, "hos2", priors_half_cauchy)
+run_prior_predictive_checks(hos.es, "hos3", priors_half_normal)
+
+# Plot results for hospitalisation models
+grid.arrange(hos1.priorpc.plot,
+             hos2.priorpc.plot,
+             hos3.priorpc.plot)
+```
+
+
+```{r, warning = FALSE, message = FALSE, fig.cap = "Model Prior Predictive Checks (Death)"}
+# Death
+run_prior_predictive_checks(death.es, "death1", priors_non_informative)
+run_prior_predictive_checks(death.es, "death2", priors_half_cauchy)
+run_prior_predictive_checks(death.es, "death3", priors_half_normal)
+
+# Plot results for death models
+grid.arrange(death1.priorpc.plot,
+             death2.priorpc.plot,
+             death3.priorpc.plot)
+```
+
+
+## Posterior Predictive Checks
+
+```{r, warning = FALSE, message = FALSE}
+# Set seed for reproducibility
+set.seed(18006513)
+
+## Define function to prepare trace plots and calculate R-hats statistics
+plot_and_rhat <- function(model, params){
+    # Prepare posterior array
+    posterior_array <- as.array(model)
+    dimnames(posterior_array)$variable <- c("Intercept", "Tau", "sigma", "Intercept2",
+                                            params, "lprior", "lp__")
+    
+    # Trace plots
+    trace_plot <- mcmc_trace(posterior_array, pars = c("Intercept", "Tau", params))
+    print(trace_plot)
+    
+    # Calculate R-hats
+    print(rhat(model))
+}
+
+
+## Define function for posterior predictive checks
+posterior_predictive_check <- function(model, ndraws) {
+    pp_check_plot <- pp_check(model, ndraws = ndraws)
+    print(pp_check_plot)
+}
+```
+
+
+### Infection
+
+```{r, warning = FALSE, message = FALSE}
+### Bayesian model estimation for each outcome ###
+
+## Infection
+for (i in 1:3) {
+    # Define priors based on model type
+    priors <- switch(i,
+                     priors_non_informative,
+                     priors_half_cauchy,
+                     priors_half_normal)
+    
+    # Run Bayesian model
+    infec_mod <- brm(data = infec.es,
+                     family = "gaussian",
+                     yi | se(sei) ~ 1 + (1 | author_id),
+                     prior = priors,
+                     iter = 2000, warmup = 1000, cores = 4, chains = 4,
+                     control = list(adapt_delta = 0.99),
+                     seed = 18006513)
+    
+    # Print model summary
+    print(summary(infec_mod))
+    
+    # Plot trace and calculate R-hats
+    plot_and_rhat(infec_mod, paste("RE:", 1:15))
+    
+    # Perform posterior predictive check
+    posterior_predictive_check(infec_mod, ndraws = 200)
+}
+```
+
+### Symptomatic Infection
+
+```{r, warning = FALSE, message = FALSE}
+## Symptomatic Infection
+for (i in 1:3) {
+    priors <- switch(i,
+                     priors_non_informative,
+                     priors_half_cauchy,
+                     priors_half_normal)
+    
+    # Run Bayesian model
+    sym_infec_mod <- brm(data = sym.infec.es,
+                         family = "gaussian",
+                         yi | se(sei) ~ 1 + (1 | author_id),
+                         prior = priors,
+                         iter = 2000, warmup = 1000, cores = 4, chains = 4,
+                         control = list(adapt_delta = 0.99),
+                         seed = 18006513)
+    
+    # Print model summary
+    print(summary(sym_infec_mod))
+    
+    # Plot trace and calculate R-hats
+    plot_and_rhat(sym_infec_mod, paste("RE:", 1:5))
+    
+    # Perform posterior predictive check
+    posterior_predictive_check(sym_infec_mod, ndraws = 200)
+}
+```
+
+### Severe Infection
+
+```{r, warning = FALSE, message = FALSE}
+## Severe Infection
+for (i in 1:3) {
+    priors <- switch(i,
+                     priors_non_informative,
+                     priors_half_cauchy,
+                     priors_half_normal)
+    
+    # Run Bayesian model
+    sev_infec_mod <- brm(data = sev.infec.es,
+                         family = "gaussian",
+                         yi | se(sei) ~ 1 + (1 | author_id),
+                         prior = priors,
+                         iter = 2000, warmup = 1000, cores = 4, chains = 4,
+                         control = list(adapt_delta = 0.99),
+                         seed = 18006513)
+    
+    # Print model summary
+    print(summary(sev_infec_mod))
+    
+    # Plot trace and calculate R-hats
+    plot_and_rhat(sev_infec_mod, paste("RE:", 1:6))
+    
+    # Perform posterior predictive check
+    posterior_predictive_check(sev_infec_mod, ndraws = 200)
+}
+```
+
+### Hospitalisation
+
+```{r, warning = FALSE, message = FALSE}
+## Hospitalisation
+for (i in 1:3) {
+    priors <- switch(i,
+                     priors_non_informative,
+                     priors_half_cauchy,
+                     priors_half_normal)
+    
+    # Run Bayesian model
+    hos_mod <- brm(data = hos.es,
+                   family = "gaussian",
+                   yi | se(sei) ~ 1 + (1 | author_id),
+                   prior = priors,
+                   iter = 2000, warmup = 1000, cores = 4, chains = 4,
+                   control = list(adapt_delta = 0.99),
+                   seed = 18006513)
+    
+    # Print model summary
+    print(summary(hos_mod))
+    
+    # Plot trace and calculate R-hats
+    plot_and_rhat(hos_mod, paste("RE:", 1:4))
+    
+    # Perform posterior predictive check
+    posterior_predictive_check(hos_mod, ndraws = 200)
+}
+```
+
+### Death
+
+```{r, warning = FALSE, message = FALSE}
+## Death
+for (i in 1:3) {
+    priors <- switch(i,
+                     priors_non_informative,
+                     priors_half_cauchy,
+                     priors_half_normal)
+    
+    # Run Bayesian model
+    death_mod <- brm(data = death.es,
+                     family = "gaussian",
+                     yi | se(sei) ~ 1 + (1 | author_id),
+                     prior = priors,
+                     iter = 2000, warmup = 1000, cores = 4, chains = 4,
+                     control = list(adapt_delta = 0.99),
+                     seed = 18006513)
+    
+    # Print model summary
+    print(summary(death_mod))
+    
+    # Plot trace and calculate R-hats
+    plot_and_rhat(death_mod, paste("RE:", 1:3))
+    
+    # Perform posterior predictive check
+    posterior_predictive_check(death_mod, ndraws = 200)
+}
+```
