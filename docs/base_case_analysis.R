@@ -1,5 +1,6 @@
-# BUGS base case running script
+# BUGS Base-Case Model running script
 
+# Library relevant packages
 library(R2jags)
 library(dplyr)
 library(reshape2)
@@ -11,46 +12,59 @@ library(mcmcplots)
 library(bayesplot)
 library(ggplot2)
 
+# Model set-up
+# filein <- "BUGS/Base-Case Model_BUGS_code.txt"
+bc_model <- "C:/Users/zcahtly/Desktop/Base_Case_Model_BUGS_code.txt"
 
-# Initial values
-inits <- 
-  list(
-    list(d = c(0, 0, 0, 0, 0, NA, NA, NA, NA)),
-    list(d = c(-1, -3, -1, -3, -1, NA, NA, NA, NA)),
-    list(d = c(1, -3, 1, -3, 1, NA, NA, NA, NA)),
-    list(d = c(2, 4, 2, 4, 2, NA, NA, NA, NA)))
 
 # Data
-outcome_data <- read.csv(file = "raw_data/covid_vaccine_data.csv")
+events_data <- read.csv("covid_vaccine_data_r.csv")
+total_vaccination_data <- read.csv("covid_vaccine_data_n.csv")
+# Data for observed no. of events and total vaccinated people
+# excluding the third column indicating the study id
+r <- as.matrix(events_data[, -3])
+n <- as.matrix(total_vaccination_data[, -3])
+bc_data <- list(r = r, n = n)
 
-# jags set-up
 
-filein <- "BUGS/Base-Case Model_BUGS_code.txt"
-params <- c("rr")
+# Initial values for chains
+bc_inits <- list(
+  list(d = c(0, 0, 0, 0, 0, NA, NA, NA, NA)),
+  list(d = c(-1, -3, -1, -3, -1, NA, NA, NA, NA)),
+  list(d = c(1, -3, 1, -3, 1, NA, NA, NA, NA)),
+  list(d = c(2, 4, 2, 4, 2, NA, NA, NA, NA))
+)
+
+
+
+# Parameters to monitor
+bc_params <- c("d", "rr", "totresdev")
+
 
 n.iter <- 20000
 n.burnin <- 1000
-n.thin <- floor((n.iter - n.burnin)/500)
+n.thin <- floor((n.iter - n.burnin) / 500)
 
-dataJags <-
-  list(r =,
-       n =,
-       # r_pred
-    
-)
 
-res_bugs <-
-  R2OpenBUGS::bugs(
-    data = dataJags,
-    inits = NULL,
-    parameters.to.save = params,
-    model.file = filein,
-    n.chains = 1,
-    n.iter,
-    n.burnin,
-    n.thin,
-    DIC = TRUE)
+# Run WinBUGS using R2WinBUGS
+base_case <- bugs(
+  data = bc_data, 
+  inits = bc_inits, 
+  parameters.to.save = bc_params, 
+  model.file = bc_model,
+  n.chains = 4, 
+  n.iter = 20000,
+  n.burnin = 1000,
+  n.thin = 1,
+  DIC = TRUE,
+  debug = TRUE)
 
-R2WinBUGS::attach.bugs(res_bugs$BUGSoutput)
+
+print(base_case)
+base_case$summary
+
+
+R2WinBUGS::attach.bugs(base_case)
 
 mcmc_intervals
+plot(base_case)
