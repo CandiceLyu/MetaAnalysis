@@ -110,14 +110,11 @@ for (j in 1:9){
 	      }
 	      
 # generated quantities
-for (k in 1:nk) {
-  for (i in 1:ns_death) {
-		r_pred[i, k] ~ dbin(p[i, k], n[i, k])
-	}
-		r_pred[k] ~ dbin(mu[k], 100)
-}
-
-
-		
+#for (k in 1:nk) {
+#  for (i in 1:ns_death) {
+#		r_pred[i, k] ~ dbin(p[i, k], n[i, k])
+#	}
+#		r_pred[k] ~ dbin(mu[k], 100)
+#}
 
 }
