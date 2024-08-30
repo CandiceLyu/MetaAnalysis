@@ -23,8 +23,8 @@ for (i in 1:46){
 
 # Model for effect 0 => 1 (row 1 to 15)
 for (i in 1:15){
-	     log(p[i, 1]) <- mu[i] + min(delta1[i], -mu[i])
-	     delta1[i] ~ dnorm(d[1], tau)                             # 0 => 1 study-specific effects
+	        log(p[i, 1]) <- mu[i] + min(delta1[i], -mu[i])
+	        delta1[i] ~ dnorm(d[1], tau)                             # 0 => 1 study-specific effects
 	      }
 # Weakly informative prior for mean 0 => 1 effect
 d[1] ~ dnorm(0, 1)
@@ -39,64 +39,64 @@ tau <- pow(sd, -2)
 
 # Model for effect 0 => 2 (row 16 to 20)
 for (i in 16:20){
-	       log(p[i, 1]) <- mu[i] + min(delta2[i], -mu[i])
-	       delta2[i] ~ dnorm(d[2], tau)                          # 0 => 2 study-specific effects
+	         log(p[i, 1]) <- mu[i] + min(delta2[i], -mu[i])
+	         delta2[i] ~ dnorm(d[2], tau)                          # 0 => 2 study-specific effects
 	       }
 # Weakly informative prior for mean 0 => 2 effect
 d[2] ~ dnorm(0, 1)
 
 # Model for effect 0 => 3 (row 21 to 26)
 for (i in 21:26){
-                       log(p[i, 1]) <- mu[i] + min(delta3[i], -mu[i])
-                       delta3[i] ~ dnorm(d[3], tau)                          # 0 => 3 study-specific effects
+                 log(p[i, 1]) <- mu[i] + min(delta3[i], -mu[i])
+                 delta3[i] ~ dnorm(d[3], tau)                          # 0 => 3 study-specific effects
 	       }
 # Weakly informative prior for mena 0 => 3 effect
 d[3] ~ dnorm(0, 1)									
 	
 # Model for effect 0 => 4 (row 27 to 30)
 for (i in 27:30){
-                        log(p[i, 1]) <- mu[i] + min(delta4[i], -mu[i])
-	        delta4[i] ~ dnorm(d[4], tau)                          # 0 => 4 study-specific effects
+                 log(p[i, 1]) <- mu[i] + min(delta4[i], -mu[i])
+	         delta4[i] ~ dnorm(d[4], tau)                          # 0 => 4 study-specific effects
 	       }
 # Weakly informative prior for mean 0 => 4 effect
 d[4] ~ dnorm(0, 1)					
 
 # Model for effect 0 => 5 (row 31 to 33)
 for (i in 31:33){
- 	       log(p[i, 1]) <- mu[i] + min(delta5[i], -mu[i])
-	       delta5[i] ~ dnorm(d[5], tau)                            # 0 => 5 study-specific effects
+ 	         log(p[i, 1]) <- mu[i] + min(delta5[i], -mu[i])
+	         delta5[i] ~ dnorm(d[5], tau)                            # 0 => 5 study-specific effects
 	       }
 # Weakly informative prior for mean 0 => 5 effect
 d[5] ~ dnorm(0, 1)					
 
 # Model for effect 1 => 2 (row 34 to 38)
 for (i in 34:38){
-	       log(p[i, 1]) <- mu[i] + min(delta6[i], -mu[i])
-                       delta6[i] ~ dnorm(d[6], tau)
+	         log(p[i, 1]) <- mu[i] + min(delta6[i], -mu[i])
+                 delta6[i] ~ dnorm(d[6], tau)
 	       }
 # Direct 1 => 2 effect
 d[6] ~ dnorm(0, 1)
 
 # Model for effect 2 => 3 (row 39 to 41)
 for (i in 39:41){
-	       log(p[i, 1]) <- mu[i] + min(delta7[i], -mu[i])
-	       delta7[i] ~ dnorm(d[7], tau)
+	         log(p[i, 1]) <- mu[i] + min(delta7[i], -mu[i])
+	         delta7[i] ~ dnorm(d[7], tau)
 	       }
 # Direct 2 => 3 effect
 d[7] ~ dnorm(0, 1)
 
 # Model for effect 3 => 4 (row 42 to 44)
 for (i in 42:44){
-	       log(p[i, 1]) <- mu[i] + min(delta8[i], -mu[i])
-	       delta8[i] ~ dnorm(d[8], tau)
+	         log(p[i, 1]) <- mu[i] + min(delta8[i], -mu[i])
+	         delta8[i] ~ dnorm(d[8], tau)
 	        }
 # Direct 3 => 4 effect
 d[8] ~ dnorm(0, 1)
 
 # Model for effect 4 => 5 (row 45 to 46)
 for (i in 45:46){
-	       log(p[i, 1]) <- mu[i] + min(delta9[i], -mu[i])
-	       delta9[i] ~ dnorm(d[9], tau)
+	         log(p[i, 1]) <- mu[i] + min(delta9[i], -mu[i])
+	         delta9[i] ~ dnorm(d[9], tau)
 	       }
 # Direct 4 => 5 effect
 d[9] ~ dnorm(0, 1)
