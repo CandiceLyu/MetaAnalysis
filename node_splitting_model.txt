@@ -1,0 +1,135 @@
+# 2. Node-Splitting Model
+
+# Model specification
+model {
+# Loop through all rows
+for (i in 1:46){
+		# Log of the baseline probability
+		mu[i] <- log(p[i, 2])
+		# Vague prior for the baseline probability
+		p[i, 2] ~ dunif(0, 1)
+			
+		# Loop through the two interventions
+		for (k in 1:2){
+				# Binomial likelihood
+				r[i, k] ~ dbin(p[i, k], n[i, k])
+				# Expected number of events
+				rhat[i, k] <- p[i, k] * n[i, k]
+				# Deviance contribution of each observation
+				dev[i, k] <- 2 * (r[i, k] * (log(r[i, k]) - log(rhat[i, k])) 
+						+ (n[i, k] - r[i, k]) * (log(n[i, k] - r[i, k]) - log(n[i, k] - rhat[i, k])))		
+				}
+ 		}
+
+# Model for effect 0 => 1 (row 1 to 15)
+for (i in 1:15){
+		log(p[i, 1]) <- mu[i] + min(delta1[i], -mu[i])
+		# 0 => 1 trial-specific effects
+		delta1[i] ~ dnorm(d[1], tau)
+		}
+# Weakly informative prior for mean 0 => 1 effect
+d[1] ~ dnorm(0, 1)
+
+# Priors for standard deviation and precision
+# Half-normal(0, 0.5) prior for SD
+sd ~ dnorm(0, prec) I(0, ) 
+# Precision for the half-normal prior
+prec <- pow(0.5, -1)
+# Precision for the normal distribution of delta[i]
+tau <- pow(sd, -2)
+
+# Model for effect 0 => 2 (row 16 to 20)
+for (i in 16:20){
+		log(p[i, 1]) <- mu[i] + min(delta2[i], -mu[i])
+		# 0 => 2 trial-specific effects
+		delta2[i] ~ dnorm(d[2], tau)
+		}
+# Weakly informative prior for 0 => 2 effect
+d[2] ~ dnorm(0, 1)
+
+# Model for effect 0 => 3 (row 21 to 26)
+for (i in 21:26){
+		 log(p[i, 1]) <- mu[i] + min(delta3[i], -mu[i])
+		# 0 => 3 trial-specific effects
+		delta3[i] ~ dnorm(d[3], tau)
+		}
+# Weakly informative prior for 0 => 3 effect
+d[3] ~ dnorm(0, 1)									
+	
+# Model for effect 0 => 4 (row 27 to 30)
+for (i in 27:30){
+		 log(p[i, 1]) <- mu[i] + min(delta4[i], -mu[i])
+		# 0 => 4 trial-specific effects
+		delta4[i] ~ dnorm(d[4], tau)
+		}
+# Weakly informative prior for 0 => 4 effect
+d[4] ~ dnorm(0, 1)					
+
+# Model for effect 0 => 5 (row 31 to 33)
+for (i in 31:33){
+		 log(p[i, 1]) <- mu[i] + min(delta5[i], -mu[i])
+		# 0 => 5 trial-specific effects
+		delta5[i] ~ dnorm(d[5], tau)
+		}
+# Weakly informative prior for 0 => 5 effect
+d[5] ~ dnorm(0, 1)					
+
+# Model for effect 1 => 2 (row 34 to 38)
+for (i in 34:38){
+		 log(p[i, 1]) <- mu[i] + min(delta6[i], -mu[i])
+		 delta6[i] ~ dnorm(d[6], tau)
+		}
+# Direct 1 => 2 effect
+d[6] ~ dnorm(0, 1)
+
+# Model for effect 2 => 3 (row 39 to 41)
+for (i in 39:41){
+		 log(p[i, 1]) <- mu[i] + min(delta7[i], -mu[i])
+		 delta7[i] ~ dnorm(d[7], tau)
+		}
+# Direct 2 => 3 effect
+d[7] ~ dnorm(0, 1)
+
+# Model for effect 3 => 4 (row 42 to 44)
+for (i in 42:44){
+		 log(p[i, 1]) <- mu[i] + min(delta8[i], -mu[i])
+		 delta8[i] ~ dnorm(d[8], tau)
+		}
+# Direct 3 => 4 effect
+d[8] ~ dnorm(0, 1)
+
+# Model for effect 4 => 5 (row 45 to 46)
+for (i in 45:46){
+		 log(p[i, 1]) <- mu[i] + min(delta9[i], -mu[i])
+		 delta9[i] ~ dnorm(d[9], tau)
+		}
+# Direct 4 => 5 effect
+d[9] ~ dnorm(0, 1)
+
+# Indirect 1 => 2 effect through 0 => 1 => 2 
+d[10] <- d[2] - d[1] 
+# Indirect 2 => 3 effect through 0 => 1 => 2 => 3
+d[11] <- d[3] - d[2] 
+# Indirect 3 => 4 effect through 0 => 1 => 2 => 3 => 4
+d[12] <- d[4] - d[3] 
+# Indirect 4 => 5 effect through 0 => 1 => 2 => 3 => 4 => 5
+d[13] <- d[5] - d[4] 
+
+# Checking for conflict between direct and indirect effects
+# Direct  - Indirect 
+p.val[1] <- step(d[6] - d[10])
+p.val[2] <- step(d[7] - d[11])
+p.val[3] <- step(d[8] - d[12])
+p.val[4] <- step(d[9] - d[13])
+
+# Total residual deviance
+totresdev <- sum(dev[ , ])
+
+# Calculate Relative Risks (RR)
+for (j in 1:13){
+	# Log RR for each effect
+	log(rr[j]) <- d[j]
+	      }
+}
+
+}
