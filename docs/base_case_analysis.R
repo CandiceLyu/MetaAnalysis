@@ -15,8 +15,8 @@ library(ggplot2)       # For creating plots
 bc_model <- "C:/Users/lvtianying/Desktop/base_case_code.txt"
 
 # Load data: observed outcomes and total number of vaccinated individuals
-outcomes <- readxl::read_xlsx("node_r.xlsx")
-total_vaccination <- readxl::read_xlsx("node_n.xlsx")
+outcomes <- read.csv("covid_outcome_r.csv", header = TRUE)
+total_vaccination <- read.csv("covid_total_n.csv", header = TRUE)
 # Prepare data for the model (excluding the study ID column)
 bc_r <- as.matrix(outcomes[, -3])
 bc_n <- as.matrix(total_vaccination[, -3])
@@ -54,7 +54,7 @@ mcmcplots::mcmcplot(base_case, regex = "rr")
 mcmc_samples <- as.mcmc(base_case)
 # Plot traceplots to assess chain convergence
 coda::traceplot(mcmc_samples)
-# Calculate and display the Gelman-Rubin diagnostic for convergence
+# Calculate and display the Gelman-Rubin diagnostics for convergence
 gelman.diag(mcmc_samples)
-# Generate a Gelman-Rubin plot for visual inspection of convergence
+# Generate Gelman-Rubin plots for visual inspection of convergence
 gelman.plot(mcmc_samples)
