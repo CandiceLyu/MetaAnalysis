@@ -121,7 +121,6 @@ ggplot(aes(x = b_Intercept, y = author_id), data = infec.forest) +
   theme_minimal() +
   scale_y_discrete(limits = rev(levels(infec.summ$author_id))) 
 
-
 ########################################################################
 # 2.Symptomatic Infection
 sym.bayes <- brm(data = sym.infec.es,
