@@ -10,17 +10,17 @@ The contents in this repository are designed to provide a comprehensive view of 
 
 ## Contents
 
-1. `R_running_scripts`: R scripts for data processing, analyses, and visualisations.
-2. `docs`: Documentations related to the study, including outputs from separate frequentist and Bayesian analyses.
-3. `multi_state_BUGS_code`: BUGS code used for Bayesian multi-state modelling.
-4. `raw_data`: Raw datasets used in the analyses.
+1. **`R_running_scripts`**: R scripts for data processing, analyses, and visualisations.
+2. **`docs`**: Documentations related to the study, including outputs from separate frequentist and Bayesian analyses.
+3. **`multi_state_BUGS_code`**: BUGS code used for Bayesian multi-state modelling.
+4. **`raw_data`**: Raw datasets used in the analyses.
 
 ## How to Use
 
-1. `R_running_scripts`: Run these scripts in R to reproduce the data processing and analysis steps described in the dissertation.
-2. `docs`: Review these documents for detailed insights into the study's methodologies and findings.
-3. `multi_state_BUGS_code`: Run the BUGS code in appropriate Bayesian analysis software to replicate the multi-state modelling.
-4. `raw_data`: Access these datasets for further analyses or to verify the results presented in the dissertation.
+1. **`R_running_scripts`**: Run these scripts in R to reproduce the data processing and analysis steps described in the dissertation.
+2. **`docs`**: Review these documents for detailed insights into the study's methodologies and findings.
+3. **`multi_state_BUGS_code`**: Run the BUGS code in appropriate Bayesian analysis software to replicate the multi-state modelling.
+4. **`raw_data`**: Access these datasets for further analyses or to verify the results presented in the dissertation.
 
 ## Contact
 
