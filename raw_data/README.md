@@ -32,9 +32,9 @@ The data includes five outcome measures, reflecting increasing severity with sma
 
 ## Column Descriptions
 
-- **study_id/author_id**: Unique identifier for each study.
-- **age**: Age group of the study population.
-- **interv_id1**: Unique ID for the reference vaccine group.
-- **interv_id2**: Unique ID for the comparison vaccine group.
-- **N1, N2**: Sample sizes for the reference and comparison vaccine groups, respectively..
-- **n1, n2**: Number of cases in each vaccine group.
+- **`study_id/author_id`**: Unique identifier for each study.
+- **`age`**: Age group of the study population.
+- **`interv_id1`**: Unique ID for the reference vaccine group.
+- **`interv_id2`**: Unique ID for the comparison vaccine group.
+- **`N1`**, **`N2`**: Sample sizes for the reference and comparison vaccine groups, respectively..
+- **`n1`**, **`n2`**: Number of cases in each vaccine group.
